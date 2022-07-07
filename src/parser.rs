@@ -1,5 +1,5 @@
-use crate::enviroment::JoinString;
-use crate::executor::RuntimeResult;
+use crate::enviroment::{Enviroment, JoinString};
+use crate::executor::{Bind, RuntimeResult};
 use crate::lexer::{Lexer, LexerError, NumberType, Token, TokenType};
 
 use std::collections::HashMap;
@@ -23,12 +23,22 @@ impl From<LexerError> for ParserError {
     }
 }
 
+type FunctionParameters = Vec<Ast>;
+type Closure = dyn Fn(FunctionParameters) -> RuntimeResult<Ast>;
 #[derive(Clone)]
-pub struct Function(pub Rc<Box<dyn Fn(Vec<Ast>) -> RuntimeResult<Ast>>>);
+pub enum Function {
+    Closure(Rc<Closure>),
+    UserDefined {
+        bindings: Vec<Bind>,
+        body: Box<Ast>,
+        env: Enviroment,
+    },
+    Empty,
+}
 
 impl Function {
     pub fn empty() -> Self {
-        Self(Rc::new(Box::new(|_| unreachable!())))
+        Self::Empty
     }
 }
 
@@ -100,17 +110,17 @@ impl Ast {
                     string.clone()
                 }
             }
-            Ast::Ident(string) => format!("{string}"),
-            Ast::Nil => format!("nil"),
+            Ast::Ident(string) => string.to_string(),
+            Ast::Nil => "nil".to_string(),
             Ast::Variadic(value) => format!("& {value}"),
-            Ast::Bool(value) => format!("{}", if *value { "true" } else { "false" }),
+            Ast::Bool(value) => (if *value { "true" } else { "false" }).to_string(),
             Ast::Quote(value) => format!("(quote {value})",),
             Ast::QuasiQuote(value) => format!("(quasiquote {value})",),
             Ast::Unquote(value) => format!("(unquote {value})",),
             Ast::SpliceUnquote(value) => format!("(splice-unquote {value})",),
             Ast::Deref(value) => format!("(deref {value})",),
             Ast::Key(value) => format!(":{value}",),
-            Ast::Function(_) => format!("#<function>",),
+            Ast::Function(_) => "#<function>".to_string(),
             Ast::Metadata(metadata, value) => {
                 format!(
                     "(with-meta {value} {{{}}})",

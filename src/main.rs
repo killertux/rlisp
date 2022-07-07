@@ -1,7 +1,7 @@
 use std::io::{stdin, stdout, BufRead, BufReader, Result as IoResult, Write};
 
 use enviroment::Enviroment;
-use executor::{Executor, RuntimeError};
+use executor::{execute_all, RuntimeError};
 use lexer::Lexer;
 use parser::{Ast, Parser};
 
@@ -12,11 +12,11 @@ mod parser;
 
 fn main() -> IoResult<()> {
     let reader = BufReader::new(stdin());
-    let mut executor = Executor::new(Enviroment::default());
+    let mut enviroment = Enviroment::default();
     print_cursor()?;
     for line in reader.lines() {
         let line = line?;
-        print!("{}", rep(&line, &mut executor));
+        print!("{}", rep(&line, &mut enviroment));
         print_cursor()?;
     }
     Ok(())
@@ -41,6 +41,9 @@ fn print(ast: Result<Vec<Ast>, RuntimeError>) -> String {
     }
 }
 
-fn rep(input: &str, executor: &mut Executor) -> String {
-    print(executor.execute_all(Parser::new(Lexer::new(input)).collect()))
+fn rep(input: &str, enviroment: &mut Enviroment) -> String {
+    print(execute_all(
+        enviroment,
+        Parser::new(Lexer::new(input)).collect(),
+    ))
 }

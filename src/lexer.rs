@@ -132,15 +132,15 @@ impl<'a> Iterator for Lexer<'a> {
                         }
                         '\\' if self.chars.next_if_eq(&'"').is_some() => {
                             self.location.advance();
-                            text.push_str("\"")
+                            text.push('\"')
                         }
                         '\\' if self.chars.next_if_eq(&'\\').is_some() => {
                             self.location.advance();
-                            text.push_str("\\")
+                            text.push('\\')
                         }
                         '\\' if self.chars.next_if_eq(&'n').is_some() => {
                             self.location.advance();
-                            text.push_str("\n")
+                            text.push('\n')
                         }
                         '"' => return Some(Ok(Token::new(Text(text), location))),
                         _ => text.push(c),

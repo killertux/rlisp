@@ -6,6 +6,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+#[derive(Clone)]
 pub struct Enviroment {
     inner: Rc<RefCell<Inner>>,
 }
@@ -65,7 +66,7 @@ impl Enviroment {
                 symbols: HashMap::from([
                     (
                         "+".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -103,7 +104,7 @@ impl Enviroment {
                     ),
                     (
                         "-".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -142,7 +143,7 @@ impl Enviroment {
                     ),
                     (
                         "*".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -180,7 +181,7 @@ impl Enviroment {
                     ),
                     (
                         "/".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -219,13 +220,13 @@ impl Enviroment {
                     ),
                     (
                         "list".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             Ok(Ast::List(args))
                         })))),
                     ),
                     (
                         "list?".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.is_empty() {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 1,
@@ -240,7 +241,7 @@ impl Enviroment {
                     ),
                     (
                         "prn".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             println!(
                                 "{}",
                                 args.iter().map(|element| element.pr_str(true)).join(" ")
@@ -250,7 +251,7 @@ impl Enviroment {
                     ),
                     (
                         "println".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             println!(
                                 "{}",
                                 args.iter().map(|element| element.pr_str(false)).join(" ")
@@ -260,7 +261,7 @@ impl Enviroment {
                     ),
                     (
                         "empty?".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.is_empty() {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 1,
@@ -277,7 +278,7 @@ impl Enviroment {
                     ),
                     (
                         "count".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.is_empty() {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 1,
@@ -294,7 +295,7 @@ impl Enviroment {
                     ),
                     (
                         "=".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -306,7 +307,7 @@ impl Enviroment {
                     ),
                     (
                         ">".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -336,7 +337,7 @@ impl Enviroment {
                     ),
                     (
                         ">=".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -366,7 +367,7 @@ impl Enviroment {
                     ),
                     (
                         "<".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -396,7 +397,7 @@ impl Enviroment {
                     ),
                     (
                         "<=".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             if args.len() < 2 {
                                 return Err(RuntimeError::InvalidNumberOfArguments {
                                     expected: 2,
@@ -425,21 +426,21 @@ impl Enviroment {
                         })))),
                     ),
                     ("not".to_string(), {
-                        use crate::executor::Executor;
+                        use crate::executor::execute;
                         use crate::lexer::Lexer;
                         use crate::parser::{Parser, ParserError};
-                        Executor::new(Enviroment::empty())
-                            .execute(
-                                Parser::new(Lexer::new("(def! not (fn* (a) (if a false true)))"))
-                                    .collect::<Result<Vec<Ast>, ParserError>>()
-                                    .unwrap()
-                                    .remove(0),
-                            )
-                            .unwrap()
+                        execute(
+                            &mut Enviroment::empty(),
+                            Parser::new(Lexer::new("(def! not (fn* (a) (if a false true)))"))
+                                .collect::<Result<Vec<Ast>, ParserError>>()
+                                .unwrap()
+                                .remove(0),
+                        )
+                        .unwrap()
                     }),
                     (
                         "pr-str".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             Ok(Ast::Text(
                                 args.into_iter().map(|arg| arg.pr_str(true)).join(" "),
                             ))
@@ -447,7 +448,7 @@ impl Enviroment {
                     ),
                     (
                         "str".to_string(),
-                        Ast::Function(Function(Rc::new(Box::new(|args: Vec<Ast>| {
+                        Ast::Function(Function::Closure(Rc::new(Box::new(|args: Vec<Ast>| {
                             Ok(Ast::Text(
                                 args.into_iter().map(|arg| arg.pr_str(false)).join(""),
                             ))
